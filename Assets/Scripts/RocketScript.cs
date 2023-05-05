@@ -14,73 +14,106 @@ public class RocketScript : MonoBehaviour
     [SerializeField] private float startTime;
 
     // 체공 시간
-    [SerializeField] private float journeyTime = 1.0f;
+    [SerializeField] private float journeyTime = 2.0f;
 
-    void Update()
+    public bool isMoving = false;
+
+    private void Start()
+    {
+    }
+
+    private void Update()
     {
         moveKey();
+
     }
 
     // 키코드 받는 함수
     void moveKey()
     {
-        if (Input.GetKey(KeyCode.Alpha1))
+        if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             planetPoint(0);
+
         }
-        if (Input.GetKey(KeyCode.Alpha2))
+        if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             planetPoint(1);
         }
-        if (Input.GetKey(KeyCode.Alpha3))
+        if (Input.GetKeyDown(KeyCode.Alpha3))
         {
             planetPoint(2);
         }
-        if (Input.GetKey(KeyCode.Alpha4))
+        if (Input.GetKeyDown(KeyCode.Alpha4))
         {
             planetPoint(3);
         }
-        if (Input.GetKey(KeyCode.Alpha5))
+        if (Input.GetKeyDown(KeyCode.Alpha5))
         {
             planetPoint(4);
         }
-        if (Input.GetKey(KeyCode.Alpha6))
+        if (Input.GetKeyDown(KeyCode.Alpha6))
         {
             planetPoint(5);
         }
-        if (Input.GetKey(KeyCode.Alpha7))
+        if (Input.GetKeyDown(KeyCode.Alpha7))
         {
             planetPoint(6);
         }
-        if (Input.GetKey(KeyCode.Alpha8))
+        if (Input.GetKeyDown(KeyCode.Alpha8))
         {
             planetPoint(7);
         }
     }
-    
+
     // 로켓 이동 함수
     void planetPoint(int number)
     {
-                    // 중간 값 계산 -> (로켓 + 도착지점) / 0.5f;
-            Vector3 center = (rocket.position + finishPoint[number].position) * 0.5f;
-            center -= new Vector3(0, 1f, 0);
+        // 로켓이 이미 이동 중이면 무시
+        if (isMoving)
+            return;
 
-            Vector3 rocketRiseCenter = rocket.position - center;
-            // 거리계산
-            Vector3 finishSetCener = finishPoint[number].position - center;
+        // 로켓과 도착지점 사이의 거리 계산
+        Vector3 distance = finishPoint[number].position - rocket.position;
 
-            // 시간 계산. 도착 시간
-            float CompleteTime = (Time.time - startTime) / journeyTime;
-            // Slerp -> 현재 위치, 목표위치, 속도
-            this.rocket.transform.position = Vector3.Slerp(rocketRiseCenter, finishSetCener, CompleteTime * Time.deltaTime);
-            transform.position += center;
+        // 로켓의 이동 속도 계산
+        float speed = distance.magnitude / journeyTime;
+
+        // 로켓 이동 방향 계산
+        Vector3 direction = distance.normalized;
+
+        // 로켓 이동
+        isMoving = true;
+        startTime = Time.time;
+
+        StartCoroutine(MoveRocketCoroutine(direction, speed));
     }
+    IEnumerator MoveRocketCoroutine(Vector3 direction, float speed)
+    {
+        while (isMoving)
+        {
+            float distance = speed * Time.deltaTime;
+            float elapsedTime = Time.time - startTime;
+            float completeTime = elapsedTime / journeyTime;
 
-    // // 코루틴후 오브젝트는 다시 위쪽으로
-    // IEnumerator testCor(int num)
-    // {
-    //     yield return new WaitForSeconds(2f);
+            // 로켓 회전 처리
+            if (completeTime >= 1f)
+            {
+                Vector3 upVector = rocket.position - direction;
+                rocket.rotation = Quaternion.LookRotation(Vector3.forward, upVector);
+            }
 
-    //     planetPoint(num);
-    // }
+            // 로켓 위치 계산 및 이동
+            Vector3 newPosition = rocket.position + direction * distance;
+            rocket.position = newPosition;
+
+            // 로켓이 도착지점에 도착하면 종료
+            if (completeTime >= 1f)
+            {
+                isMoving = false;
+            }
+
+            yield return null;
+        }
+    }
 }

@@ -44,7 +44,7 @@ public class PlanetSetting : MonoBehaviour
     void planetRoate()
     {
             saveRotate += rotateSpeed * Time.deltaTime;                         // 저장용 변수 += 속도 * Time.deltaTime(1프레임을 동일하게 하기 위해);
-            transform.rotation = Quaternion.Euler(rotateSpeed, 0, planetInclin);                                     // 물체 회전을 위해 사용
+            transform.rotation = Quaternion.Euler(saveRotate, 0, planetInclin);                                     // 물체 회전을 위해 사용
 
     }
 }
