@@ -18,14 +18,9 @@ public class RocketScript : MonoBehaviour
 
     public bool isMoving = false;
 
-    private void Start()
-    {
-    }
-
     private void Update()
     {
         moveKey();
-
     }
 
     // 키코드 받는 함수
@@ -90,28 +85,36 @@ public class RocketScript : MonoBehaviour
     }
     IEnumerator MoveRocketCoroutine(Vector3 direction, float speed)
     {
+
+        Vector3 tailDirection = transform.up;
+        Quaternion startRotation = transform.rotation;
+
         while (isMoving)
         {
             float distance = speed * Time.deltaTime;
-            float elapsedTime = Time.time - startTime;
+            float elapsedTime = Time.time - startTime;          // Time.time 시작된 이후 경과 시간을 초 단위로 반환
             float completeTime = elapsedTime / journeyTime;
 
-            // 로켓 회전 처리
-            if (completeTime >= 1f)
+
+            // 비행기 회전 처리.  completeTime 값이 1이 되면, 로켓은 도착지점에 도달한 것.
+            if (completeTime <= 1f)
+            {
+                Quaternion rotation = Quaternion.FromToRotation(tailDirection, direction);
+                transform.rotation = Quaternion.Slerp(startRotation, startRotation * rotation, completeTime * 5f);
+            }
+            // 로켓 회전 도착후 정방향
+            else
             {
                 Vector3 upVector = rocket.position - direction;
-                rocket.rotation = Quaternion.LookRotation(Vector3.forward, upVector);
+                rocket.rotation = Quaternion.LookRotation(Vector3.zero, upVector);
+
+                // 로켓이 도착지점에 도착하면 종료
+                isMoving = false;
             }
 
             // 로켓 위치 계산 및 이동
             Vector3 newPosition = rocket.position + direction * distance;
             rocket.position = newPosition;
-
-            // 로켓이 도착지점에 도착하면 종료
-            if (completeTime >= 1f)
-            {
-                isMoving = false;
-            }
 
             yield return null;
         }
