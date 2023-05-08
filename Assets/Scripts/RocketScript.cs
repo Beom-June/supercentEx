@@ -81,9 +81,9 @@ public class RocketScript : MonoBehaviour
         isMoving = true;
         startTime = Time.time;
 
-        StartCoroutine(MoveRocketCoroutine(direction, speed));
+        StartCoroutine(MoveRocketCoroutine(direction, speed, finishPoint[number]));
     }
-    IEnumerator MoveRocketCoroutine(Vector3 direction, float speed)
+    IEnumerator MoveRocketCoroutine(Vector3 direction, float speed, Transform destination)
     {
 
         Vector3 tailDirection = transform.up;
@@ -110,6 +110,7 @@ public class RocketScript : MonoBehaviour
 
                 // 로켓이 도착지점에 도착하면 종료
                 isMoving = false;
+                rocket.SetParent(destination); // 로켓의 부모를 도착지점으로 변경
             }
 
             // 로켓 위치 계산 및 이동

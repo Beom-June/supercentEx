@@ -25,11 +25,13 @@ public class MoveCam : MonoBehaviour
 
         
         Vertical = Vertical * speed_move * Time.deltaTime;
-        
+
         // ransform.RotateAround(targetSun.position, Vector3.up, speed_rot * Time.deltaTime);       // 행성 회전
 
-        // 이동
-        transform.Translate(Vector3.right * Horizontal);
+        // 카메라 좌우 회전
+        transform.RotateAround(targetSun.position, -transform.up, Horizontal * speed_move);
+        // transform.Translate(Vector3.right * Horizontal);
+        // 카메라 앞뒤 이동
         transform.Translate(Vector3.forward * Vertical);
 
     }
