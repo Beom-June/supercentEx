@@ -70,4 +70,8 @@ public class ObstacleSet : MonoBehaviour
     {
 
     }
+    private void OnTriggerEnter(Collider coll)
+    {
+
+    }
 }

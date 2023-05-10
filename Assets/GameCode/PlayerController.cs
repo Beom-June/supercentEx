@@ -19,7 +19,7 @@ public class PlayerController : MonoBehaviour
     private bool isJump = false;                                // 플레이어 점프 제어 bool 값
     private bool isDash = false;                                // 플레이어 회피 제어 bool 값
     [SerializeField] private bool isRagdoll = true; // Ragdoll 활성화 여부
-    private bool isMove = true;
+    [SerializeField] private bool isMove = true;
 
     /// <summary>
     /// Component
@@ -64,15 +64,18 @@ public class PlayerController : MonoBehaviour
         // Shift 키를 누르면 Ragdoll 활성화
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
+            // 레그돌이 꺼지면
             if (isRagdoll == false)
             {
                 isMove = false;
                 SetRagdoll(true);
             }
+            // 레그돌이 켜지면
             else
             {
                 isMove = true;
-                ResetRagdoll(true);
+                SetRagdoll(false);                  // 내가 원하는 값
+                //ResetRagdoll(true);                 // 현재 가라친거
 
             }
         }
@@ -82,25 +85,25 @@ public class PlayerController : MonoBehaviour
     // 플레이어 이동 함수
     public void PlayerMove()
     {
-        if(isMove == true) 
+        if (isMove == true)
         {
-        moveVec = new Vector3(HorizentalAxis, 0, VerticalAxis).normalized;
+            moveVec = new Vector3(HorizentalAxis, 0, VerticalAxis).normalized;
 
-        if (isDash)
-        {
-            moveVec = dashVec;
-        }
-        if (playerWalk)
-        {
-            transform.position += moveVec * Speed * 0.3f * Time.deltaTime;
-        }
-        else
-        {
-            transform.position += moveVec * Speed * Time.deltaTime;
-        }
-        //transform.position += moveVec * Speed * (WalkDown ? 0.3f : 1f) * Time.deltaTime;
-        animator.SetBool("isMove", moveVec != Vector3.zero);
-        animator.SetBool("isWalk", playerWalk);
+            if (isDash)
+            {
+                moveVec = dashVec;
+            }
+            if (playerWalk)
+            {
+                transform.position += moveVec * Speed * 0.3f * Time.deltaTime;
+            }
+            else
+            {
+                transform.position += moveVec * Speed * Time.deltaTime;
+            }
+            //transform.position += moveVec * Speed * (WalkDown ? 0.3f : 1f) * Time.deltaTime;
+            animator.SetBool("isMove", moveVec != Vector3.zero);
+            animator.SetBool("isWalk", playerWalk);
         }
         else
         {
@@ -154,56 +157,40 @@ public class PlayerController : MonoBehaviour
         dashVec = Vector3.zero;
     }
     #endregion
-    // Ragdoll 비활성화
-    private void SetRagdoll(bool active)
+
+    // Ragdoll 활성화 세팅
+    private void SetRagdoll(bool flag)
     {
-        isRagdoll = active;
-        animator.enabled = !active; // 애니메이션 비활성화
+        isRagdoll = flag;
+        animator.enabled = !flag; // 애니메이션 비활성화
 
         // Ragdoll 오브젝트 활성화/비활성화
-        ragdoll.SetActive(active);
-
-        // Rigidbody, Collider 활성화/비활성화
-        foreach (Rigidbody rb in GetComponentsInChildren<Rigidbody>())
+        if (flag == true)
         {
-            rb.isKinematic = !active;
-            rb.useGravity = active;
+            ragdoll.SetActive(flag);
+            foreach (Rigidbody rb in GetComponentsInChildren<Rigidbody>())
+            {
+                rb.isKinematic = !flag;
+                rb.useGravity = flag;
+            }
         }
-
+        else
+        {
+            ragdoll.SetActive(!flag);
+            foreach (Rigidbody rb in GetComponentsInChildren<Rigidbody>())
+            {
+                rb.isKinematic = flag;
+                rb.useGravity = flag;
+            }
+        }
         foreach (Collider col in GetComponentsInChildren<Collider>())
         {
-            col.enabled = active;
+            col.enabled = flag;
         }
 
         // 플레이어 캐릭터의 Rigidbody, Collider 활성화/비활성화
-        playerRigidbody.isKinematic = active;
-        GetComponent<CapsuleCollider>().enabled = !active;
-    }
-    // 레그돌 정상화
-    private void ResetRagdoll(bool active)
-    {
-        isRagdoll = !active;
-        animator.enabled = active; // 애니메이션 활성화
-
-        // Ragdoll 오브젝트 활성화/비활성화
-        ragdoll.SetActive(active);
-
-        // Rigidbody, Collider 활성화/비활성화
-        foreach (Rigidbody rb in GetComponentsInChildren<Rigidbody>())
-        {
-            rb.isKinematic = active;
-            rb.useGravity = active;
-        }
-
-        // 부모에서 콜라이더를 켰으니 이걸 꺼줘야함
-        foreach (Collider col in GetComponentsInChildren<Collider>())
-        {
-            col.enabled = !active;
-        }
-
-        // 플레이어 캐릭터의 Rigidbody, Collider 활성화/비활성화
-        playerRigidbody.isKinematic = !active;
-        GetComponent<CapsuleCollider>().enabled = active;
+        playerRigidbody.isKinematic = flag;
+        GetComponent<CapsuleCollider>().enabled = !flag;
     }
 
     void OnCollisionEnter(Collision collision)
@@ -225,16 +212,35 @@ public class PlayerController : MonoBehaviour
             isJump = true;
         }
 
-        if (collision.gameObject.tag == "Wall")
+        if (collision.gameObject.layer == LayerMask.NameToLayer("obstacle"))
         {
-            // 플레이어의 이동을 멈춤
-            playerRigidbody.velocity = Vector3.zero;
-        }
+            if (isRagdoll == true)
+            {
+                Debug.Log("test");
+                //foreach (Collider col in GetComponentsInChildren<Collider>())
+                //{
+                //    col.enabled = false;
+                //}
+                ////foreach (Rigidbody playerRigid in GetComponentsInChildren<Rigidbody>())
+                ////{
+                ////    playerRigid.isKinematic = true;
+                ////}
+                //// rigidbody를 비활성화합니다.
+                //GetComponent<Rigidbody>().isKinematic = true;
 
-        if (collision.gameObject.tag == "vane")
-        {
-            //Vector3 direction = (collision.transform.position - transform.position).normalized; // 충돌 대상과의 벡터를 구합니다.
-            playerRigidbody.GetComponent<Rigidbody>().AddForce(Vector3.back * force, ForceMode.Impulse); // 밀어냅니다.
+            }
+            else
+            {
+                Debug.Log("testgood");
+                //// 충돌한 방향과 반대 방향으로 force를 가해줍니다.
+                //Vector3 collisionDirection = transform.position - collision.gameObject.transform.position;
+                //collisionDirection.Normalize();
+                //GetComponent<Rigidbody>().AddForce(collisionDirection * 10f, ForceMode.Impulse);
+
+                //// 충돌 무시
+                //Physics.IgnoreCollision(collision.collider, GetComponent<Collider>());
+            }
+
         }
     }
 }
