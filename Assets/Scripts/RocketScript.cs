@@ -100,7 +100,7 @@ public class RocketScript : MonoBehaviour
             if (completeTime <= 1f)
             {
                 Quaternion rotation = Quaternion.FromToRotation(tailDirection, direction);
-                transform.rotation = Quaternion.Slerp(startRotation, startRotation * rotation, completeTime * 5f);
+                transform.rotation = Quaternion.Slerp(startRotation, startRotation * rotation, completeTime);
             }
             // 로켓 회전 도착후 정방향
             else
