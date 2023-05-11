@@ -4,8 +4,9 @@ using UnityEngine.EventSystems;
 
 public class JoyStick : MonoBehaviour, IDragHandler, IPointerDownHandler, IPointerUpHandler
 {
-    private Image JoyStickBackground;
-    private Image JoyStickImage;
+    private Image JoyStickBackground;                   // 좌측 조이스틱 백그라운드
+    private Image JoyStickImage;                        // 좌축 조이스틱 이미지
+
     private Vector2 posInput;
 
 
@@ -41,12 +42,12 @@ public class JoyStick : MonoBehaviour, IDragHandler, IPointerDownHandler, IPoint
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        // �ʱ�ȭ
+        // 터치 떼면 이미지 가운데 정렬 되게
         posInput = Vector2.zero;
         JoyStickImage.rectTransform.anchoredPosition = Vector2.zero;
     }
 
-    // x�� �Լ�
+    // x 축
     public float inputHorizontal()
     {
         if (posInput.x != 0)
@@ -55,7 +56,7 @@ public class JoyStick : MonoBehaviour, IDragHandler, IPointerDownHandler, IPoint
             return Input.GetAxis("Horizontal");
     }
 
-    // y �� �Լ�
+    // y 축
     public float inputVertical()
     {
         if (posInput.y != 0)

@@ -12,11 +12,12 @@ public class PlayerController : MonoBehaviour
     private float VerticalAxis;
 
     private bool playerWalk = false;                            // 플레이어 걷기 bool 값
-    private bool playerJump = false;                            // 플레이어 점프 bool 값
-    private bool playerDash = false;                            // 플레이어 회피 bool 값
-    [SerializeField] float force = 5f;
+    [SerializeField] private bool playerJump = false;                            // 플레이어 점프 bool 값
+    [SerializeField] private bool playerDash = false;                            // 플레이어 회피 bool 값
+    float force = 5f;
 
-    private bool isJump = false;                                // 플레이어 점프 제어 bool 값
+    [SerializeField] private bool isJump = false;                                // 플레이어 점프 제어 bool 값
+
     private bool isDash = false;                                // 플레이어 회피 제어 bool 값
     [SerializeField] private bool isRagdoll = true; // Ragdoll 활성화 여부
     [SerializeField] private bool isMove = true;
@@ -25,12 +26,23 @@ public class PlayerController : MonoBehaviour
     /// Component
     /// </summary>
     public GameObject ragdoll; // Ragdoll 오브젝트
+    private JoyStick joyStick;
+
     Vector3 moveVec;
     Vector3 dashVec;                                  // 회피시 방향이 전환되지 않도록 제한
     Rigidbody playerRigidbody;
     Collider playerCollider;
     Animator animator;
 
+    // 프로퍼티
+    public Rigidbody playerRigidCall
+    {
+        get { return playerRigidbody; }
+    }
+    public Animator playerAnimCall
+    {
+        get { return animator; }
+    }
 
     [Header("PlayerState")]
     [SerializeField] private float Speed = 10f;
@@ -40,6 +52,10 @@ public class PlayerController : MonoBehaviour
         animator = GetComponentInChildren<Animator>();
         playerRigidbody = GetComponent<Rigidbody>();
         playerCollider = GetComponent<Collider>();
+    }
+    void Start()
+    {
+        joyStick = GameObject.Find("JoyStickBackGround").GetComponent<JoyStick>();
     }
 
     void Update()
@@ -54,12 +70,18 @@ public class PlayerController : MonoBehaviour
 
     void PlayerInput()
     {
+        // 방향키 이동
         HorizentalAxis = Input.GetAxisRaw("Horizontal");
         VerticalAxis = Input.GetAxisRaw("Vertical");
 
-        //       playerWalk = Input.GetButton("Walk");                       // Left Ctrl
+        // 조이스틱 이동
+        HorizentalAxis = joyStick.inputHorizontal();
+        VerticalAxis = joyStick.inputVertical();
+
+        //playerWalk = Input.GetButton("Walk");                       // Left Ctrl
         playerJump = Input.GetButtonDown("Jump");                   // Space Bar
                                                                     //playerDash = Input.GetButtonDown("Dash");                   // Left Shift
+
 
         // Shift 키를 누르면 Ragdoll 활성화
         if (Input.GetKeyDown(KeyCode.LeftShift))
@@ -119,7 +141,7 @@ public class PlayerController : MonoBehaviour
         transform.LookAt(transform.position + moveVec);
     }
     // 플레이어 점프 함수
-    void PlayerJump()
+    public void PlayerJump()
     {
         // if (playerJump && isJump == false && moveVec == Vector3.zero && isDash == false)
         if (playerJump && isJump == false && isDash == false)
@@ -159,7 +181,7 @@ public class PlayerController : MonoBehaviour
     #endregion
 
     // Ragdoll 활성화 세팅
-    private void SetRagdoll(bool flag)
+    public void SetRagdoll(bool flag)
     {
         isRagdoll = flag;
         animator.enabled = !flag; // 애니메이션 비활성화
