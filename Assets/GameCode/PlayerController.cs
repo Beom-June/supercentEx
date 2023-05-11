@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
@@ -11,16 +12,20 @@ public class PlayerController : MonoBehaviour
     private float HorizentalAxis;
     private float VerticalAxis;
 
-    private bool playerWalk = false;                            // 플레이어 걷기 bool 값
-    [SerializeField] private bool playerJump = false;                            // 플레이어 점프 bool 값
-    [SerializeField] private bool playerDash = false;                            // 플레이어 회피 bool 값
-    float force = 5f;
+    private bool playerWalk = false;                                   // 플레이어 걷기 bool 값
+    [SerializeField] private bool playerJump = false;                   // 플레이어 점프 bool 값
+    [SerializeField] private bool playerDash = false;                      // 플레이어 회피 bool 값
 
-    [SerializeField] private bool isJump = false;                                // 플레이어 점프 제어 bool 값
+    [SerializeField] private bool isJump = false;                    // 플레이어 점프 제어 bool 값
 
-    private bool isDash = false;                                // 플레이어 회피 제어 bool 값
-    [SerializeField] private bool isRagdoll = true; // Ragdoll 활성화 여부
+    private bool isDash = false;                                     // 플레이어 회피 제어 bool 값
+    [SerializeField] private bool isRagdoll = true;                 // Ragdoll 활성화 여부
     [SerializeField] private bool isMove = true;
+    [SerializeField] private bool isProgressBar;                // 스타트 지점 부터 프로그래스바 체크를 위한 bool 값
+    [SerializeField] private float totalDistance;                                    // 전체 거리 (endPoint ~ startPoint)dddddddddd
+    [SerializeField] private float currentDistance;                                  // 현재 위치(거리)
+    [SerializeField]private Vector3 prevPosition;                                   // 이전 위치 저장
+
 
     /// <summary>
     /// Component
@@ -28,10 +33,15 @@ public class PlayerController : MonoBehaviour
     public GameObject ragdoll; // Ragdoll 오브젝트
     private JoyStick joyStick;
 
+    [Header("ProgressBar")]
+    public Transform startPoint;
+    public Transform endPoint;
+    public Slider progressBar;
+
     Vector3 moveVec;
     Vector3 dashVec;                                  // 회피시 방향이 전환되지 않도록 제한
     Rigidbody playerRigidbody;
-    Collider playerCollider;
+    Collider playerCollider;                        
     Animator animator;
 
     // 프로퍼티
@@ -56,6 +66,10 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         joyStick = GameObject.Find("JoyStickBackGround").GetComponent<JoyStick>();
+
+        // 출발 지점과 도착 지점 사이의 거리를 계산
+        totalDistance = Vector3.Distance(startPoint.position, endPoint.position);
+        prevPosition = transform.position;                                              // 이전 위치를 현재 위치로 저장
     }
 
     void Update()
@@ -66,6 +80,8 @@ public class PlayerController : MonoBehaviour
         PlayerTurn();
         PlayerJump();
         PlayerDash();
+
+        ProgressBarControll();
     }
 
     void PlayerInput()
@@ -213,6 +229,20 @@ public class PlayerController : MonoBehaviour
         // 플레이어 캐릭터의 Rigidbody, Collider 활성화/비활성화
         playerRigidbody.isKinematic = flag;
         GetComponent<CapsuleCollider>().enabled = !flag;
+    }
+
+    void ProgressBarControll()
+    {
+        // 전체거리 : 출발 지점, 끝 지점 계산
+        float totalDistance = Vector3.Distance(startPoint.position, endPoint.position);
+
+        // 현재 거리 : 움직인 거리 : 시작 지점
+        float currentDistance = Vector3.Distance(transform.position, startPoint.position);
+
+        // 진행 상황을 계산
+        float progress = currentDistance / totalDistance;
+
+        progressBar.value = progress;
     }
 
     void OnCollisionEnter(Collision collision)
