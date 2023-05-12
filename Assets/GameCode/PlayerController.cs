@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.SocialPlatforms;
 
 public class PlayerController : MonoBehaviour
 {
@@ -24,14 +25,19 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private bool isProgressBar;                // 스타트 지점 부터 프로그래스바 체크를 위한 bool 값
     [SerializeField] private float totalDistance;                                    // 전체 거리 (endPoint ~ startPoint)dddddddddd
     [SerializeField] private float currentDistance;                                  // 현재 위치(거리)
-    [SerializeField]private Vector3 prevPosition;                                   // 이전 위치 저장
+    [SerializeField] private Vector3 prevPosition;                                   // 이전 위치 저장
 
 
     /// <summary>
     /// Component
     /// </summary>
-    public GameObject ragdoll; // Ragdoll 오브젝트
+    public GameObject ragdoll;                                      // Ragdoll 오브젝트
+    [Header("PlayerSetting")]
+    [SerializeField] private float Speed = 10f;
+    public Transform spawnPoint;                                   // 캐릭터 스폰 포인트
     private JoyStick joyStick;
+    public AudioSource playerSfx;
+    public AudioClip jumpSfx;                                       // 점프 사운드
 
     [Header("ProgressBar")]
     public Transform startPoint;
@@ -41,8 +47,9 @@ public class PlayerController : MonoBehaviour
     Vector3 moveVec;
     Vector3 dashVec;                                  // 회피시 방향이 전환되지 않도록 제한
     Rigidbody playerRigidbody;
-    Collider playerCollider;                        
+    Collider playerCollider;
     Animator animator;
+
 
     // 프로퍼티
     public Rigidbody playerRigidCall
@@ -53,9 +60,15 @@ public class PlayerController : MonoBehaviour
     {
         get { return animator; }
     }
+    public AudioSource playerSfxCall
+    {
+        get { return playerSfx; }
+    }
+    public AudioClip jumpSfxCall
+    {
+        get { return jumpSfx; }
+    }
 
-    [Header("PlayerState")]
-    [SerializeField] private float Speed = 10f;
 
     void Awake()
     {
@@ -70,6 +83,7 @@ public class PlayerController : MonoBehaviour
         // 출발 지점과 도착 지점 사이의 거리를 계산
         totalDistance = Vector3.Distance(startPoint.position, endPoint.position);
         prevPosition = transform.position;                                              // 이전 위치를 현재 위치로 저장
+
     }
 
     void Update()
@@ -165,6 +179,9 @@ public class PlayerController : MonoBehaviour
             playerRigidbody.AddForce(Vector3.up * 5, ForceMode.Impulse);
             animator.SetTrigger("doJump");
             isJump = true;
+
+            // 점프 사운드
+            playerSfx.PlayOneShot(jumpSfx);
         }
     }
     // 플레이어 대쉬 함수
@@ -252,17 +269,39 @@ public class PlayerController : MonoBehaviour
             isJump = false;
         }
 
-        if (collision.gameObject.tag == "FinishPoint")
-        {
-            SceneManager.LoadScene("SolarSystemScene");
-        }
+        // if (collision.gameObject.tag == "FinishPoint")
+        // {
+        //     SceneManager.LoadScene("SolarSystemScene");
+        // }
 
-        if (collision.gameObject.tag == "jumpZone")
+        if (collision.gameObject.CompareTag("jumpZone"))
         {
             playerRigidbody.AddForce(Vector3.up * 5, ForceMode.Impulse);
             animator.SetTrigger("doJump");
             isJump = true;
+
+            // 점프 사운드
+            playerSfx.PlayOneShot(jumpSfx);
         }
+
+        // 지면 아래 마감선
+        if (collision.gameObject.CompareTag("Restart"))
+        {
+            Debug.Log("ggg");
+            this.gameObject.transform.position = spawnPoint.transform.position;
+        }
+
+        // finish point에 도달 했을 때
+        if (collision.gameObject.CompareTag("Finish"))
+        {
+            GameObject endPopUp = FindObjectOfType<UIController>().endPopUp;
+            if (endPopUp != null)
+            {
+                endPopUp.SetActive(true);
+            }
+        }
+
+        /// 테스트중
 
         if (collision.gameObject.layer == LayerMask.NameToLayer("obstacle"))
         {

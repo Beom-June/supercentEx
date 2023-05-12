@@ -8,12 +8,17 @@ public class UIController : MonoBehaviour
 {
     public PlayerController player;
     public FadeController fadeControll;
+    public GameObject endPopUp;
 
-    public Button JumpButton, ragdollButton, endButton;
+    public Button JumpButton, ragdollButton, endButton, restartButton;
     public Text txtTime;
+    public Text txtDurTime;
+    public AudioSource playerSfx;
+    public AudioClip crowdSfx;
     [SerializeField] bool isRag = false;
     [SerializeField] bool isTimeBool = false;
     [SerializeField] private float time = 0.0f;
+    [SerializeField] private float endTime = 0.0f;
 
     public bool isTimeBoolCall
     {
@@ -24,19 +29,26 @@ public class UIController : MonoBehaviour
     void Update()
     {
         if (isTimeBool == true)
+        {
             TimeFuc();
+            DurTime();
+        }
     }
     void Start()
     {
         JumpCall();
-        ragdollCall();
-        endCall(false);
+        RagdollCall();
+        EndCall(false);
+        RestartCall(true);
 
-        // FadeController Å¬·¡½ºÀÇ ÀÎ½ºÅÏ½º¸¦ Ã£½À´Ï´Ù.
+
+        // FadeController Å¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Î½ï¿½ï¿½Ï½ï¿½ï¿½ï¿½ Ã£ï¿½ï¿½ï¿½Ï´ï¿½.
         FadeController fadeController = FindObjectOfType<FadeController>();
 
-        // FadeController Å¬·¡½º¿¡¼­ startBoolCall ÇÁ·ÎÆÛÆ¼ÀÇ °ªÀ» ÂüÁ¶ÇÏ¿© isTimeBool °ªÀ» ¼³Á¤ÇÕ´Ï´Ù.
         isTimeBool = fadeController.startBoolCall;
+
+        // ì‹œê°„ ê¸°ë¡
+        time = Time.time;
     }
 
     void JumpCall()
@@ -45,9 +57,11 @@ public class UIController : MonoBehaviour
         {
             player.playerRigidCall.AddForce(Vector3.up * 5, ForceMode.Impulse);
             player.playerAnimCall.SetTrigger("doJump");
+
+            player.playerSfxCall.PlayOneShot(player.jumpSfxCall);
         });
     }
-    void ragdollCall()
+    void RagdollCall()
     {
 
         ragdollButton.onClick.AddListener(() =>
@@ -56,12 +70,28 @@ public class UIController : MonoBehaviour
         });
     }
 
-    void endCall(bool flag)
+    void EndCall(bool flag)
     {
         endButton.onClick.AddListener(() =>
         {
             EditorApplication.isPlaying = flag;
-            Debug.Log("TT");
+
+            // ì‚¬ìš´ë“œ ì¬ìƒ
+            playerSfx.PlayOneShot(crowdSfx);
+        });
+    }
+    void RestartCall(bool flag)
+    {
+        restartButton.onClick.AddListener(() =>
+        {
+            EditorApplication.isPlaying = flag;
+            player.transform.position = player.spawnPoint.transform.position;
+
+            // íŒì—… ë„ê¸°ìœ„í•¨
+            endPopUp.SetActive(false);
+
+            // ì‚¬ìš´ë“œ ì¬ìƒ
+            playerSfx.PlayOneShot(crowdSfx);
         });
     }
     void TimeFuc()
@@ -70,6 +100,17 @@ public class UIController : MonoBehaviour
         {
             time += Time.deltaTime;
             txtTime.text = $"{time:N2}";
+        }
+    }
+
+    // PopUp UI ì—ì„œ ê±¸ë¦° ì‹œê°„ ì¶œë ¥
+    void DurTime()
+    {
+        if (fadeControll.startBoolCall)
+        {
+            // í˜„ì¬ ì‹œê°„ê³¼ ì‹œì‘ ì‹œê°„ì„ ë¹¼ì„œ ê²½ê³¼ ì‹œê°„ì„ ê³„ì‚°
+            endTime = Time.time - time;
+            txtDurTime.text = $"{endTime:N2}";
         }
     }
 

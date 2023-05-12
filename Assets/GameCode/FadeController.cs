@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class FadeController : UIController
+public class FadeController : MonoBehaviour
 {
     public Button BtnStart;
-    public Image ImgStart;
+    public Image[] Img;
+    public Canvas cavansFade;
 
     [SerializeField]
     [Range(0.01f, 10f)]
@@ -50,10 +51,13 @@ public class FadeController : UIController
             currentTime += Time.deltaTime;
             float percent = currentTime / time;
 
-            Color color = ImgStart.color;                  // 알파 값 변경
-            color.a = Mathf.Lerp(start, end, fadeCurve.Evaluate(percent));
+            for (int i = 0; i < Img.Length; i++)
+            {
+                Color color = Img[i].color;                  // 알파 값 변경
+                color.a = Mathf.Lerp(start, end, fadeCurve.Evaluate(percent));
 
-            ImgStart.color = color;
+                Img[i].color = color;
+            }
             yield return null;
         }
 
@@ -67,7 +71,6 @@ public class FadeController : UIController
         yield return new WaitForSeconds(time);
         startBtn = true;
 
-
     }
     IEnumerator WaitForFadeFinished()
     {
@@ -76,5 +79,6 @@ public class FadeController : UIController
 
         // Fade가 끝난 후 startBtn 변수 값이 true로 변경되었으므로 isTimeBool 값을 true로 설정
         FindObjectOfType<UIController>().isTimeBoolCall = true;
+        cavansFade.enabled = false;
     }
 }
