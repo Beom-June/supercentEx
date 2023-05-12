@@ -8,6 +8,8 @@ public class FadeController : MonoBehaviour
     public Button BtnStart;
     public Image[] Img;
     public Canvas cavansFade;
+    public AudioSource playerSfx;
+    public AudioClip crowdSfx;
 
     [SerializeField]
     [Range(0.01f, 10f)]
@@ -39,6 +41,8 @@ public class FadeController : MonoBehaviour
 
             // 버튼 오브젝트 꺼버림
             BtnStart.gameObject.SetActive(false);
+
+            playerSfx.PlayOneShot(crowdSfx);
         });
         StartCoroutine(WaitForFadeFinished());
     }
