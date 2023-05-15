@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class MoveClickToPoint : MonoBehaviour
 {
+    private	Movement3D movement3D;
     // Component
     //public CharacterController characterController; // 캐릭터 컨트롤러
     public Camera mainCamera; // 메인 카메라
@@ -15,6 +16,11 @@ public class MoveClickToPoint : MonoBehaviour
     [SerializeField] private bool moveBool;
     private static readonly int MoveParam = Animator.StringToHash("isMove");
 
+void Awake()
+{
+
+		movement3D = GetComponent<Movement3D>();
+}
 
     void Start()
     {
@@ -26,6 +32,7 @@ public class MoveClickToPoint : MonoBehaviour
     void Update()
     {
         MoveClick();
+        
     }
 
     void MoveClick()
@@ -48,6 +55,8 @@ public class MoveClickToPoint : MonoBehaviour
                 anim.SetBool(MoveParam, true);
                 Debug.Log("movePoint : " + movePoint.ToString());
                 Debug.Log("맞은 객체 : " + raycastHit.transform.name);
+
+                // movement3D.MoveTo(movePoint.point);
 
             }
         }
