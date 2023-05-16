@@ -114,4 +114,16 @@ public class MoveController : MonoBehaviour
         // Off mesh link를 건너뛰도록 NavMeshAgent에 명령합니다.
         navMeshAgent.CompleteOffMeshLink();
     }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("TimeLine"))
+        {
+            navMeshAgent.enabled = false;
+        }
+        if (other.gameObject.CompareTag("FinishPoint"))
+        {
+            navMeshAgent.enabled = true;
+        }
+    }
 }

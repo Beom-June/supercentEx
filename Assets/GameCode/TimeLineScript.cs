@@ -9,6 +9,8 @@ public class TimeLineScript : MonoBehaviour
 {
     public PlayableDirector director;
     public GameObject fadeUI;
+    public GameObject mainCam;
+    public GameObject timelineCam;
 
     private void Start()
     {
@@ -23,6 +25,9 @@ public class TimeLineScript : MonoBehaviour
             {
                 director.Play();
                 fadeUI.SetActive(true);
+
+                //timelineCam.SetActive(true);
+                //mainCam.SetActive(false);
             }
         }
         if (Coll.gameObject.CompareTag("FinishPoint"))
@@ -30,6 +35,9 @@ public class TimeLineScript : MonoBehaviour
             if (director != null)
             {
                 director.Stop();
+
+                mainCam.SetActive(true);
+                timelineCam.SetActive(false);
             }
         }
     }
@@ -38,7 +46,6 @@ public class TimeLineScript : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Player"))
         {
-            fadeUI.SetActive(false);
         }
     }
 }
